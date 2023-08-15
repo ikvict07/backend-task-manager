@@ -34,34 +34,39 @@ public class TokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String jwt = null;
-        String username = null;
         try {
-            String headerAuth = request.getHeader("Authorization");
-            if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-                jwt = headerAuth.substring(7);
-            }
+            String jwt = getJwt(request);
             if (jwt != null) {
-                try {
-                    username = jwtCore.getNameFromJwt(jwt);
-                } catch (ExpiredJwtException ignored) {
-
-                }
+                String username = getUsername(jwtCore, jwt);
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = userService.loadUserByUsername(username);
-                    var auth = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                    authenticate(userService, username);
                 }
             }
-
-        } catch (Exception ignored) {
-
-        }
+        } catch (Exception ignored) {}
         filterChain.doFilter(request, response);
     }
 
+    private static String getJwt(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7);
+        }
+        return null;
+    }
+
+    private static String getUsername(JwtCore jwtCore, String jwt) {
+        String username = null;
+        try {
+             username = jwtCore.getNameFromJwt(jwt);
+        } catch (ExpiredJwtException ignored) {}
+        return username;
+    }
+
+    private static void authenticate(UserServiceImpl userService, String username) {
+        UserDetails userDetails = userService.loadUserByUsername(username);
+        SecurityContextHolder
+                .getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null));
+    }
 }
 
