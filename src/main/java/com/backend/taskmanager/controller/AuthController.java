@@ -47,6 +47,18 @@ public class AuthController {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Handle POST request for creating a new user account.
+     *
+     * @param request comprised of JSON body with "username" & "password"
+     * `SignUpRequest` DTO class used to capture request body.
+     *
+     * @return ResponseEntity of type String which holds the status of account creation
+     * returns "Success" as body with HTTP status OK on successful creation,
+     * returns "This username is already used" with HTTP status BAD_REQUEST if entered username is already in use.
+     *
+     * @see com.backend.taskmanager.jsonBody.SignUpRequest
+     */
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -61,6 +73,16 @@ public class AuthController {
         return ResponseEntity.ok("Success");
     }
 
+    /**
+     * Handle POST requests on "/sign-in" endpoint for user signin process.
+     *
+     * @param request a `SignInRequest` object that holds the login credentials (username, password) of the user
+     *
+     * @return ResponseEntity with JWT token as body and HTTP status OK in case of successful sign-in,
+     * returns "Incorrect credentials" with HTTP status UNAUTHORIZED, if entered credentials are wrong.
+     *
+     * @see com.backend.taskmanager.jsonBody.SignInRequest
+     */
     @PostMapping("/sign-in")
     public ResponseEntity<?> signIn(@RequestBody SignInRequest request) {
         Authentication auth;
