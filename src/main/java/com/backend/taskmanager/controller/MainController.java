@@ -150,11 +150,11 @@ public class MainController {
         }
 
         if(updates.containsKey("isCompleted")){
-            task.setCompleted((Boolean) updates.get("isCompleted"));
+            task.setCompleted((Boolean.parseBoolean((String) updates.get("isCompleted"))));
         }
 
         if(updates.containsKey("isExpired")){
-            task.setExpired((Boolean) updates.get("isExpired"));
+            task.setExpired((Boolean.parseBoolean((String) updates.get("isExpired"))));
         }
 
         if(updates.containsKey("deadline")){
