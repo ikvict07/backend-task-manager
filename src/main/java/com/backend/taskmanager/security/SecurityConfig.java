@@ -4,6 +4,7 @@ import com.backend.taskmanager.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -44,7 +45,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    protected AuthenticationManagerBuilder authenticationManagerBuilder(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+    @Primary
+    protected AuthenticationManagerBuilder customAuthenticationManagerBuilder(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder.userDetailsService(userService).passwordEncoder(passwordEncoder());
         return authenticationManagerBuilder;
     }
@@ -62,8 +64,8 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers("").fullyAuthenticated()
-                                .requestMatchers("").permitAll()
+                                .requestMatchers("/user/**").fullyAuthenticated()
+                                .requestMatchers("/auth/**").permitAll()
                                 .anyRequest().permitAll()
                 )
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class); // Will do authorization if user uses jwt
